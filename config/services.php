@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'rapid_api' => [
+        'base_url' => env('RAPID_API_BASE_URL', 'https://api-football-v1.p.rapidapi.com/v3/'),
+        'api_key' => env('RAPID_API_API_KEY'),
+        'host' => env('RAPID_API_HOST', 'api-football-v1.p.rapidapi.com'),
+    ],
 ];
