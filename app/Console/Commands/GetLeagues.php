@@ -2,9 +2,17 @@
 
 namespace App\Console\Commands;
 
+use App\Constants\ApiEndpoints;
 use App\Models\AvailableLeague;
+use App\Models\Fixture;
+use App\Models\League;
+use App\Models\Team;
 use App\Services\ApiService;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GetLeagues extends Command
 {
@@ -20,7 +28,7 @@ class GetLeagues extends Command
      *
      * @var string
      */
-    protected $description = 'Get leagues from the RapidAPI';
+    protected $description = 'Get the leagues from the RapidAPI';
 
     private $apiService;
 
@@ -35,30 +43,38 @@ class GetLeagues extends Command
      */
     public function handle()
     {
-        $availableLeagues = AvailableLeague::all();
+        try {
+            $availableLeagues = AvailableLeague::all();
 
-        \App\Models\League::truncate();
+            DB::table('fixtures')->delete();
+            DB::table('teams')->delete();
+            DB::table('leagues')->delete();
 
-        foreach ($availableLeagues as $availableLeague) {
-            $league = $this->apiService->request('leagues', [
-                'name' => $availableLeague->name,
-                'country' => $availableLeague->country
-            ]);
-
-            if ($league) {
-                $league = $league->response[0]->league;
-
-                \App\Models\League::create([
-                    'league_id' => $league->id,
-                    'name' => $league->name,
-                    'logo' => $league->logo
+            foreach ($availableLeagues as $availableLeague) {
+                $league = $this->apiService->request(ApiEndpoints::LEAGUES, [
+                    'name' => $availableLeague->name,
+                    'country' => $availableLeague->country
                 ]);
-            } else {
-                $this->error('Failed to fetch a league: ' . $availableLeague->name);
-                return;
-            }
+                    $league = $league->response[0]->league;
+
+                    $rounds = $this->apiService->request(ApiEndpoints::ROUNDS, [
+                        'league' => $league->id,
+                        'season' => Carbon::now()->year
+                    ]);
+
+                    League::create([
+                        'league_api_id' => $league->id,
+                        'name' => $league->name,
+                        'logo' => $league->logo,
+                        'rounds' => count($rounds->response)
+                    ]);
+                }
+
+                $this->info('Leagues updated successfully.');
+        } catch(Exception $e) {
+            Log::error('Error fetching leagues: ' . $e->getMessage());
+            $this->error('Failed to fetch a league: ' . $availableLeague->name);
         }
-        
-        $this->info('Leagues updated successfully.');
     }
 }
+
