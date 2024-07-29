@@ -47,22 +47,21 @@ class GetLeaguesCurrentRoundFixtures extends Command
             $leagues = League::all();
 
             foreach($leagues as $league) {
-                $this->getFixtures($league, 2);
-                // $currentRound = $this->apiService->request(ApiEndpoints::ROUNDS, [
-                //     'league' => $league->league_api_id,
-                //     'season' => Carbon::now()->year,
-                //     'current' => 'true'
-                // ]);
+                $currentRound = $this->apiService->request(ApiEndpoints::ROUNDS, [
+                    'league' => $league->league_api_id,
+                    'season' => Carbon::now()->year,
+                    'current' => 'true'
+                ]);
 
-                // preg_match('/\d+/', $currentRound->response[0], $matches);
-                // $currentRound = (int)$matches[0];
+                preg_match('/\d+/', $currentRound->response[0], $matches);
+                $currentRound = (int)$matches[0];
 
-                // if ($league->current_round !== $currentRound) {
-                //     $league->current_round = $currentRound;
-                //     $league->save();
+                if ($league->current_round !== $currentRound) {
+                    $league->current_round = $currentRound;
+                    $league->save();
 
-                //     $this->getFixtures($league, $currentRound);
-                // }
+                    $this->getFixtures($league, $currentRound);
+                }
             }
 
             DB::commit();
