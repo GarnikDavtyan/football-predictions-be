@@ -11,6 +11,15 @@ class Team extends Model
 
     protected $fillable = [
         'name',
-        'logo'
+        'logo',
+        'league_id',
+        'rank',
+        'games',
+        'win',
+        'draw',
+        'lose',
+        'goal_diff',
+        'points',
+        'form'
     ];
 }

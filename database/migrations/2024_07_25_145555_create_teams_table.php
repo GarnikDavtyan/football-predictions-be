@@ -13,8 +13,18 @@ return new class extends Migration
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('league_id')->constrained();
             $table->string('name');
             $table->string('logo');
+            $table->integer('rank')->nullable();
+            $table->integer('games')->nullable();
+            $table->integer('win')->nullable();
+            $table->integer('draw')->nullable();
+            $table->integer('lose')->nullable();
+            $table->integer('goal_diff')->nullable();
+            $table->integer('points')->nullable();
+            $table->string('form')->nullable();
+
             
             $table->timestamps();
         });

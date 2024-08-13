@@ -7,4 +7,5 @@ class ApiEndpoints {
     const ROUNDS = 'fixtures/rounds';
     const TEAMS = 'teams';
     const FIXTURES = 'fixtures';
+    const STANDINGS = 'standings';
 }

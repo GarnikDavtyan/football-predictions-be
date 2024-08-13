@@ -7,25 +7,22 @@ class Leagues {
         // [
         //     'country' => 'World',
         //     'name' => 'UEFA Champions League'
-        // ],[
-        //     'country' => 'England',
-        //     'name' => 'Premier League'
-        // ],[
-        //     'country' => 'Italy',
-        //     'name' => 'Serie A'
-        // ],[
-        //     'country' => 'Spain',
-        //     'name' => 'La Liga'
-        // ],[
-        //     'country' => 'Germany',
-        //     'name' => 'Bundesliga'
-        // ],[
-        //     'country' => 'France',
-        //     'name' => 'Ligue 1'
         // ],
         [
-            'country' => 'Russia',
+            'country' => 'England',
             'name' => 'Premier League'
+        ],[
+            'country' => 'Italy',
+            'name' => 'Serie A'
+        ],[
+            'country' => 'Spain',
+            'name' => 'La Liga'
+        ],[
+            'country' => 'Germany',
+            'name' => 'Bundesliga'
+        ],[
+            'country' => 'France',
+            'name' => 'Ligue 1'
         ]
     ];
 }

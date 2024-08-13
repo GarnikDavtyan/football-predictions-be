@@ -3,7 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FixturesController;
 use App\Http\Controllers\LeagueController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\PointsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('leagues', [LeagueController::class, 'index']);
 Route::get('fixtures/{leagueId}/{round}', [FixturesController::class, 'getFixtures']);
+Route::get('leagues/{leagueId}/standings', [LeagueController::class, 'getStandings']);
+Route::get('points/{leagueId}/{round}', [PointsController::class, 'getLeagueTop']);
 
 Route::middleware(['guest'])->group(function () {
     Route::controller(AuthController::class)->group(function () {

@@ -51,6 +51,7 @@ class GetTeams extends Command
                 
                 foreach($teams->response as $team) {
                     Team::create([
+                        'league_id' => $league->id,
                         'name' => $team->team->name,
                         'logo' => $team->team->logo
                     ]);
