@@ -30,5 +30,6 @@ Route::middleware(['guest'])->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('fixtures/{leagueId}/{round}', [FixturesController::class, 'savePredictions']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });

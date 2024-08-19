@@ -30,4 +30,9 @@ class Fixture extends Model
     {
         return $this->belongsTo(Team::class, 'team_away_id');
     }
+
+    public function predictions()
+    {
+        return $this->hasMany(Prediction::class);
+    }
 }

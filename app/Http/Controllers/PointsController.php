@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UserHelper;
 use App\Models\LeaguePoint;
 use App\Models\RoundPoint;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class PointsController extends Controller
 {
@@ -16,21 +16,24 @@ class PointsController extends Controller
         $leaguePoints = $this->getTopPoints(LeaguePoint::class, $leagueId);
         $roundPoints = $this->getTopPoints(RoundPoint::class, $leagueId, $round);
 
-        $authId = $this->getAuthUserId($request);
-        if ($authId) {
-            $isUserInLeagueTop = $leaguePoints->contains('user_id', $authId);
-            if (!$isUserInLeagueTop) {
-                $userPoints = $this->getAuthUserPointsAndRank(LeaguePoint::class, $authId, $leagueId);
-                if($userPoints) {
-                    $leaguePoints->push($userPoints);
+        $token = $request->bearerToken();
+        if ($token) {
+            $authId = UserHelper::getAuthUserId($token);
+            if ($authId) {
+                $isUserInLeagueTop = $leaguePoints->contains('user_id', $authId);
+                if (!$isUserInLeagueTop) {
+                    $userPoints = $this->getAuthUserPointsAndRank(LeaguePoint::class, $authId, $leagueId);
+                    if($userPoints) {
+                        $leaguePoints->push($userPoints);
+                    }
                 }
-            }
 
-            $isUserInRoundTop = $roundPoints->contains('user_id', $authId);
-            if (!$isUserInRoundTop) {
-                $userPoints = $this->getAuthUserPointsAndRank(RoundPoint::class, $authId, $leagueId, $round);
-                if($userPoints) {
-                    $roundPoints->push($userPoints);
+                $isUserInRoundTop = $roundPoints->contains('user_id', $authId);
+                if (!$isUserInRoundTop) {
+                    $userPoints = $this->getAuthUserPointsAndRank(RoundPoint::class, $authId, $leagueId, $round);
+                    if($userPoints) {
+                        $roundPoints->push($userPoints);
+                    }
                 }
             }
         }
@@ -47,24 +50,6 @@ class PointsController extends Controller
         }
 
         return $query->orderByDesc('points')->take(10)->get();
-    }
-
-    /**
-     * Auth:id() is not working when calling outside of auth:sanctum middleware.
-     * Getting user id from access token
-     */
-    private function getAuthUserId(Request $request): ?int
-    {
-        $token = $request->bearerToken();
-        $authId = null;
-
-        if ($token) {
-            $accessToken = PersonalAccessToken::findToken($token);
-
-            $authId = $accessToken ? $accessToken->tokenable_id : null;
-        }
-
-        return $authId;
     }
 
     private function getAuthUserPointsAndRank(string $model, int $authId, int $leagueId, ?int $round = null): ?object

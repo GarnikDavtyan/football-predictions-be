@@ -2,19 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UserHelper;
+use App\Http\Requests\PredictionsRequest;
 use App\Models\Fixture;
+use App\Models\Prediction;
+use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FixturesController extends Controller
 {
-    public function getFixtures(int $leagueId, int $round): JsonResponse
+    public function getFixtures(Request $request, int $leagueId, int $round): JsonResponse
     {
-        $fixtures = Fixture::with(['teamHome', 'teamAway'])
+        $fixturesQuery = Fixture::with(['teamHome', 'teamAway'])
                         ->where('league_id', $leagueId)
-                        ->where('round', $round)
-                        ->orderBy('date')
-                        ->get();
+                        ->where('round', $round);
+
+        $token = $request->bearerToken();
+        if ($token) {
+            $authId = UserHelper::getAuthUserId($token);
+            if ($authId) {
+                $fixturesQuery = $fixturesQuery->with(['predictions' => function ($query) use ($authId) {
+                    $query->where('user_id', $authId);
+                }]);
+            }
+        }
+        
+        $fixtures = $fixturesQuery->orderBy('date')->get();
 
         return $this->successResponse($fixtures);
+    }
+
+    public function savePredictions(PredictionsRequest $request): JsonResponse
+    {
+        try {
+            DB::beginTransaction();
+
+            $data = [
+                'user_id' => Auth::id()
+            ];
+
+            foreach($request->predictions as $prediction) {
+                $data['fixture_id'] = $prediction['fixture_id'];
+                Prediction::updateOrCreate($data, $prediction);
+            }
+
+            DB::commit();
+
+            return $this->successResponse([], 'Saved successfully!');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
     }
 }
