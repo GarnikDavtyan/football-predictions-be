@@ -21,6 +21,7 @@ Route::get('leagues', [LeagueController::class, 'index']);
 Route::get('fixtures/{leagueId}/{round}', [FixturesController::class, 'getFixtures']);
 Route::get('leagues/{leagueId}/standings', [LeagueController::class, 'getStandings']);
 Route::get('points/{leagueId}/{round}', [PointsController::class, 'getLeagueTop']);
+Route::get('points', [PointsController::class, 'getTop']);
 
 Route::middleware(['guest'])->group(function () {
     Route::controller(AuthController::class)->group(function () {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\UserHelper;
 use App\Models\LeaguePoint;
 use App\Models\RoundPoint;
+use App\Models\UserPoint;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -41,9 +42,13 @@ class PointsController extends Controller
         return $this->successResponse(compact('leaguePoints', 'roundPoints'));
     }
 
-    private function getTopPoints(string $model, int $leagueId, ?int $round = null): Collection
+    private function getTopPoints(string $model, ?int $leagueId = null, ?int $round = null): Collection
     {
-        $query = $model::with('user')->where('league_id', $leagueId);
+        $query = $model::with('user');
+
+        if ($leagueId) {
+            $query->where('league_id', $leagueId);
+        }
 
         if ($round) {
             $query->where('round', $round);
@@ -52,11 +57,13 @@ class PointsController extends Controller
         return $query->orderByDesc('points')->take(10)->get();
     }
 
-    private function getAuthUserPointsAndRank(string $model, int $authId, int $leagueId, ?int $round = null): ?object
+    private function getAuthUserPointsAndRank(string $model, int $authId, ?int $leagueId=null, ?int $round = null): ?object
     {
-        $userPointsQuery = $model::with('user')
-                        ->where('league_id', $leagueId)
-                        ->where('user_id', $authId);
+        $userPointsQuery = $model::with('user')->where('user_id', $authId);
+
+        if($leagueId) {
+            $userPointsQuery = $userPointsQuery->where('league_id', $leagueId);
+        }
 
         if($round) {
             $userPointsQuery = $userPointsQuery->where('round', $round);
@@ -65,7 +72,11 @@ class PointsController extends Controller
         $userPoints = $userPointsQuery->first();
 
         if ($userPoints) {
-            $rankQuery = $model::where('league_id', $leagueId)->where('points', '>', $userPoints->points);
+            $rankQuery = $model::where('points', '>', $userPoints->points);
+
+            if($round) {
+                $rankQuery = $rankQuery->where('league_id', $leagueId);
+            }
 
             if($round) {
                 $rankQuery = $rankQuery->where('round', $round);
@@ -76,5 +87,26 @@ class PointsController extends Controller
             $userPoints->rank = $rank;
         }
         return $userPoints;
+    }
+
+    public function getTop(Request $request): JsonResponse
+    {
+        $top = $this->getTopPoints(UserPoint::class);
+
+        $token = $request->bearerToken();
+        if ($token) {
+            $authId = UserHelper::getAuthUserId($token);
+            if ($authId) {
+                $isUserInTop = $top->contains('user_id', $authId);
+                if (!$isUserInTop) {
+                    $userPoints = $this->getAuthUserPointsAndRank(UserPoint::class, $authId);
+                    if($userPoints) {
+                        $top->push($userPoints);
+                    }
+                }
+            }
+        }
+
+        return $this->successResponse($top);
     }
 }

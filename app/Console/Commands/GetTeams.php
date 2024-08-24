@@ -5,13 +5,11 @@ namespace App\Console\Commands;
 use App\Constants\ApiEndpoints;
 use App\Models\League;
 use App\Models\Team;
-use App\Services\ApiService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class GetTeams extends Command
+class GetTeams extends BaseCommand
 {
     /**
      * The name and signature of the console command.
@@ -26,14 +24,6 @@ class GetTeams extends Command
      * @var string
      */
     protected $description = 'Get the teams from the RapidAPI';
-
-    private $apiService;
-
-    public function __construct(ApiService $apiService)
-    {
-        parent::__construct();
-        $this->apiService = $apiService;
-    }
 
     /**
      * Execute the console command.

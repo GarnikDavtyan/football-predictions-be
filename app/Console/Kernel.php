@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('get:leagues')->yearlyOn(8, 10);
         $schedule->command('get:teams')->yearlyOn(8, 10, '00:05');
-        $schedule->command('get:fixtures')->twiceDaily(1, 13);     
+        $schedule->command('get:fixtures')->twiceDaily(1, 13);
+        $schedule->command('fixtures:update-status')->everyMinute();   
     }
 
     /**

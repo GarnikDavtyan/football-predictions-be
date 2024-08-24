@@ -12,6 +12,7 @@ class League extends Model
     protected $fillable = [
         'league_api_id',
         'name',
+        'slug',
         'logo',
         'rounds'
     ];

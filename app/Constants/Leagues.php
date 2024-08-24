@@ -4,10 +4,6 @@ namespace App\Constants;
 
 class Leagues {
     const AVAILABLE_LEAGUES = [
-        // [
-        //     'country' => 'World',
-        //     'name' => 'UEFA Champions League'
-        // ],
         [
             'country' => 'England',
             'name' => 'Premier League'

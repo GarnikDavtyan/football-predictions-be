@@ -6,14 +6,12 @@ use App\Constants\ApiEndpoints;
 use App\Models\Fixture;
 use App\Models\League;
 use App\Models\Team;
-use App\Services\ApiService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class GetLeaguesCurrentRoundFixtures extends Command
+class GetLeaguesCurrentRoundFixtures extends BaseCommand
 {
     /**
      * The name and signature of the console command.
@@ -28,14 +26,6 @@ class GetLeaguesCurrentRoundFixtures extends Command
      * @var string
      */
     protected $description = 'Get the current round and fixtures of the leagues from RapidApi';
-
-    private $apiService;
-
-    public function __construct(ApiService $apiService)
-    {
-        parent::__construct();
-        $this->apiService = $apiService;
-    }
 
     /**
      * Execute the console command.

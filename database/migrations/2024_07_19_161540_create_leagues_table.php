@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('league_api_id');
             $table->string('name');
+            $table->string('slug');
             $table->string('logo');
             $table->integer('rounds');
             $table->integer('current_round')->default(0);

@@ -4,17 +4,14 @@ namespace App\Console\Commands;
 
 use App\Constants\ApiEndpoints;
 use App\Models\AvailableLeague;
-use App\Models\Fixture;
 use App\Models\League;
-use App\Models\Team;
-use App\Services\ApiService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
-class GetLeagues extends Command
+class GetLeagues extends BaseCommand
 {
     /**
      * The name and signature of the console command.
@@ -29,14 +26,6 @@ class GetLeagues extends Command
      * @var string
      */
     protected $description = 'Get the leagues from the RapidAPI';
-
-    private $apiService;
-
-    public function __construct(ApiService $apiService)
-    {
-        parent::__construct();
-        $this->apiService = $apiService;
-    }
 
     /**
      * Execute the console command.
@@ -65,6 +54,7 @@ class GetLeagues extends Command
                     League::create([
                         'league_api_id' => $league->id,
                         'name' => $league->name,
+                        'slug' => Str::slug($league->name),
                         'logo' => $league->logo,
                         'rounds' => count($rounds->response)
                     ]);
