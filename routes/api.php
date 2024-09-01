@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FixturesController;
 use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\PointsController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,8 +19,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('leagues', [LeagueController::class, 'index']);
+
 Route::get('fixtures/{leagueId}/{round}', [FixturesController::class, 'getFixtures']);
 Route::get('leagues/{leagueId}/standings', [LeagueController::class, 'getStandings']);
+
 Route::get('points/{leagueId}/{round}', [PointsController::class, 'getLeagueTop']);
 Route::get('points', [PointsController::class, 'getTop']);
 
@@ -32,5 +35,9 @@ Route::middleware(['guest'])->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('fixtures/{leagueId}/{round}', [FixturesController::class, 'savePredictions']);
+
+    Route::put('profile', [ProfileController::class, 'updateProfile']);
+    Route::delete('profile/avatar-delete', [ProfileController::class, 'deleteAvatar']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
 });

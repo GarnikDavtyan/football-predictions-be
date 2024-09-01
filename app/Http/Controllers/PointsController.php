@@ -24,7 +24,7 @@ class PointsController extends Controller
                 $isUserInLeagueTop = $leaguePoints->contains('user_id', $authId);
                 if (!$isUserInLeagueTop) {
                     $userPoints = $this->getAuthUserPointsAndRank(LeaguePoint::class, $authId, $leagueId);
-                    if($userPoints) {
+                    if ($userPoints) {
                         $leaguePoints->push($userPoints);
                     }
                 }
@@ -32,7 +32,7 @@ class PointsController extends Controller
                 $isUserInRoundTop = $roundPoints->contains('user_id', $authId);
                 if (!$isUserInRoundTop) {
                     $userPoints = $this->getAuthUserPointsAndRank(RoundPoint::class, $authId, $leagueId, $round);
-                    if($userPoints) {
+                    if ($userPoints) {
                         $roundPoints->push($userPoints);
                     }
                 }
@@ -57,15 +57,15 @@ class PointsController extends Controller
         return $query->orderByDesc('points')->take(10)->get();
     }
 
-    private function getAuthUserPointsAndRank(string $model, int $authId, ?int $leagueId=null, ?int $round = null): ?object
+    private function getAuthUserPointsAndRank(string $model, int $authId, ?int $leagueId = null, ?int $round = null): ?object
     {
         $userPointsQuery = $model::with('user')->where('user_id', $authId);
 
-        if($leagueId) {
+        if ($leagueId) {
             $userPointsQuery = $userPointsQuery->where('league_id', $leagueId);
         }
 
-        if($round) {
+        if ($round) {
             $userPointsQuery = $userPointsQuery->where('round', $round);
         }
 
@@ -74,14 +74,14 @@ class PointsController extends Controller
         if ($userPoints) {
             $rankQuery = $model::where('points', '>', $userPoints->points);
 
-            if($round) {
+            if ($round) {
                 $rankQuery = $rankQuery->where('league_id', $leagueId);
             }
 
-            if($round) {
+            if ($round) {
                 $rankQuery = $rankQuery->where('round', $round);
             }
-            
+
             $rank = $rankQuery->count() + 1;
 
             $userPoints->rank = $rank;
@@ -100,7 +100,7 @@ class PointsController extends Controller
                 $isUserInTop = $top->contains('user_id', $authId);
                 if (!$isUserInTop) {
                     $userPoints = $this->getAuthUserPointsAndRank(UserPoint::class, $authId);
-                    if($userPoints) {
+                    if ($userPoints) {
                         $top->push($userPoints);
                     }
                 }
