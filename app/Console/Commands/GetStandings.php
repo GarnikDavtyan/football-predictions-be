@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
-class GetLeaguesStandings extends BaseCommand
+class GetStandings extends BaseCommand
 {
     /**
      * The name and signature of the console command.
@@ -31,15 +31,13 @@ class GetLeaguesStandings extends BaseCommand
     public function handle()
     {
         try {
-            $leagues = League::all();
-
-            foreach($leagues as $league) {
+            foreach (League::all() as $league) {
                 $standings = $this->apiService->request(ApiEndpoints::STANDINGS, [
                     'league' => $league->league_api_id,
                     'season' => Carbon::now()->year
                 ]);
-                
-                foreach($standings->response[0]->league->standings[0] as $team) {
+
+                foreach ($standings->response[0]->league->standings[0] as $team) {
                     Team::where('name', $team->team->name)
                         ->update([
                             'rank' => $team->rank,

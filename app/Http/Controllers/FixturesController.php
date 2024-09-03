@@ -17,8 +17,8 @@ class FixturesController extends Controller
     public function getFixtures(Request $request, int $leagueId, int $round): JsonResponse
     {
         $fixturesQuery = Fixture::with(['teamHome', 'teamAway'])
-                        ->where('league_id', $leagueId)
-                        ->where('round', $round);
+            ->where('league_id', $leagueId)
+            ->where('round', $round);
 
         $token = $request->bearerToken();
         if ($token) {
@@ -29,7 +29,7 @@ class FixturesController extends Controller
                 }]);
             }
         }
-        
+
         $fixtures = $fixturesQuery->orderBy('date')->get();
 
         return $this->successResponse($fixtures);
@@ -44,7 +44,7 @@ class FixturesController extends Controller
                 'user_id' => Auth::id()
             ];
 
-            foreach($request->predictions as $prediction) {
+            foreach ($request->predictions as $prediction) {
                 $data['fixture_id'] = $prediction['fixture_id'];
                 Prediction::updateOrCreate($data, $prediction);
             }

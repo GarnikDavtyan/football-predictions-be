@@ -19,8 +19,8 @@ class Prediction extends Model
         'x2'
     ];
 
-    protected $casts = [
-        'score_home' => 'string',
-        'score_away' => 'string',
-    ];
+    public function fixture()
+    {
+        return $this->belongsTo(Fixture::class, 'fixture_id');
+    }
 }

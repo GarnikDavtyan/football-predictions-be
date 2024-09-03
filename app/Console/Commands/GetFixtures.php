@@ -11,7 +11,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class GetLeaguesCurrentRoundFixtures extends BaseCommand
+class GetFixtures extends BaseCommand
 {
     /**
      * The name and signature of the console command.
@@ -34,9 +34,8 @@ class GetLeaguesCurrentRoundFixtures extends BaseCommand
     {
         try {
             DB::beginTransaction();
-            $leagues = League::all();
 
-            foreach($leagues as $league) {
+            foreach (League::all() as $league) {
                 $currentRound = $this->apiService->request(ApiEndpoints::ROUNDS, [
                     'league' => $league->league_api_id,
                     'season' => Carbon::now()->year,
@@ -64,7 +63,7 @@ class GetLeaguesCurrentRoundFixtures extends BaseCommand
         }
     }
 
-    private function getFixtures(League $league, int $round) 
+    private function getFixtures(League $league, int $round)
     {
         $fixtures = $this->apiService->request(ApiEndpoints::FIXTURES, [
             'league' => $league->league_api_id,
@@ -72,16 +71,16 @@ class GetLeaguesCurrentRoundFixtures extends BaseCommand
             'round' => 'Regular Season - ' . $round
         ]);
 
-        if(!count($fixtures->response)) {
+        if (!count($fixtures->response)) {
             throw new Exception('Fixtures are empty: ' . $league->name);
         }
 
-        foreach($fixtures->response as $fixture) {
+        foreach ($fixtures->response as $fixture) {
             $teamHome = Team::where('name', $fixture->teams->home->name)->first();
             $teamAway = Team::where('name', $fixture->teams->away->name)->first();
 
             Fixture::create([
-                'fixture_id' => $fixture->fixture->id,
+                'fixture_api_id' => $fixture->fixture->id,
                 'league_id' => $league->id,
                 'round' => $round,
                 'date' => $fixture->fixture->date,

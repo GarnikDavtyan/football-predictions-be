@@ -31,15 +31,13 @@ class GetTeams extends BaseCommand
     public function handle()
     {
         try {
-            $leagues = League::all();
-
-            foreach($leagues as $league) {
+            foreach (League::all() as $league) {
                 $teams = $this->apiService->request(ApiEndpoints::TEAMS, [
                     'league' => $league->league_api_id,
                     'season' => Carbon::now()->year
                 ]);
-                
-                foreach($teams->response as $team) {
+
+                foreach ($teams->response as $team) {
                     Team::create([
                         'league_id' => $league->id,
                         'name' => $team->team->name,

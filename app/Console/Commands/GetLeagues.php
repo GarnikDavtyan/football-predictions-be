@@ -33,38 +33,41 @@ class GetLeagues extends BaseCommand
     public function handle()
     {
         try {
-            $availableLeagues = AvailableLeague::all();
-
+            DB::table('predictions')->delete();
             DB::table('fixtures')->delete();
             DB::table('teams')->delete();
+            DB::table('round_points')->delete();
+            DB::table('league_points')->delete();
+            DB::table('user_points')->delete();
             DB::table('leagues')->delete();
+
+            $availableLeagues = AvailableLeague::all();
 
             foreach ($availableLeagues as $availableLeague) {
                 $league = $this->apiService->request(ApiEndpoints::LEAGUES, [
                     'name' => $availableLeague->name,
                     'country' => $availableLeague->country
                 ]);
-                    $league = $league->response[0]->league;
+                $league = $league->response[0]->league;
 
-                    $rounds = $this->apiService->request(ApiEndpoints::ROUNDS, [
-                        'league' => $league->id,
-                        'season' => Carbon::now()->year
-                    ]);
+                $rounds = $this->apiService->request(ApiEndpoints::ROUNDS, [
+                    'league' => $league->id,
+                    'season' => Carbon::now()->year
+                ]);
 
-                    League::create([
-                        'league_api_id' => $league->id,
-                        'name' => $league->name,
-                        'slug' => Str::slug($league->name),
-                        'logo' => $league->logo,
-                        'rounds' => count($rounds->response)
-                    ]);
-                }
+                League::create([
+                    'league_api_id' => $league->id,
+                    'name' => $league->name,
+                    'slug' => Str::slug($league->name),
+                    'logo' => $league->logo,
+                    'rounds' => count($rounds->response)
+                ]);
+            }
 
-                $this->info('Leagues updated successfully.');
-        } catch(Exception $e) {
+            $this->info('Leagues updated successfully.');
+        } catch (Exception $e) {
             Log::error('Error fetching leagues: ' . $e->getMessage());
             $this->error('Failed to fetch a league: ' . $availableLeague->name);
         }
     }
 }
-

@@ -13,9 +13,12 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('get:leagues')->yearlyOn(8, 10);
-        $schedule->command('get:teams')->yearlyOn(8, 10, '00:05');
-        $schedule->command('get:fixtures')->twiceDaily(1, 13);
-        $schedule->command('fixtures:update-status')->everyMinute();   
+        $schedule->command('get:teams')->yearlyOn(8, 10, '00:01');
+        $schedule->command('get:fixtures')->twiceDaily(0, 12, 2);
+        $schedule->command('get:standings')->twiceDaily(0, 12, 3);
+        $schedule->command('get:results')->twiceDaily(0, 12, 4);
+        $schedule->command('calculate:points')->twiceDaily(0, 12, 5);
+        $schedule->command('fixtures:update-status')->everyMinute();
     }
 
     /**
@@ -23,7 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }
