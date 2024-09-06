@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterRequest;
+use App\Jobs\SendVerificationEmail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,6 +23,8 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
         Auth::login($user);
 
+        SendVerificationEmail::dispatch($user);
+
         return $this->successResponse([
             'access_token' => $token,
             'user' => $user,
@@ -34,7 +37,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            $token = $user->createToken('LibraryAppToken')->plainTextToken;
+            $token = $user->createToken('predictor-user-token')->plainTextToken;
 
             return $this->successResponse([
                 'access_token' => $token,

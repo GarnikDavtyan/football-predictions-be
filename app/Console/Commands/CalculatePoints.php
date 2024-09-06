@@ -42,14 +42,18 @@ class CalculatePoints extends Command
 
                 $fixtures = Fixture::where('round', $round)->get();
                 foreach ($fixtures as $fixture) {
-                    $result = $fixture->score_home . '-' . $fixture->score_away;
+                    if ($fixture->status === 'FT') {
 
-                    foreach ($fixture->predictions as $prediction) {
-                        $userPrediction = $prediction->score_home . '-' . $prediction->score_away;
-                        $points = PointsHelper::calculate($result, $userPrediction, $prediction->x2);
 
-                        $prediction->points = $points;
-                        $prediction->save();
+                        $result = $fixture->score_home . '-' . $fixture->score_away;
+
+                        foreach ($fixture->predictions as $prediction) {
+                            $userPrediction = $prediction->score_home . '-' . $prediction->score_away;
+                            $points = PointsHelper::calculate($result, $userPrediction, $prediction->x2);
+
+                            $prediction->points = $points;
+                            $prediction->save();
+                        }
                     }
                 }
 
