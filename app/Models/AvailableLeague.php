@@ -11,6 +11,7 @@ class AvailableLeague extends Model
 
     protected $fillable = [
         'country',
-        'name'
+        'name',
+        'season'
     ];
 }

@@ -6,7 +6,6 @@ use App\Constants\ApiEndpoints;
 use App\Models\Fixture;
 use App\Models\League;
 use App\Models\Team;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +37,7 @@ class GetFixtures extends BaseCommand
             foreach (League::all() as $league) {
                 $currentRound = $this->apiService->request(ApiEndpoints::ROUNDS, [
                     'league' => $league->league_api_id,
-                    'season' => Carbon::now()->year,
+                    'season' => $league->season,
                     'current' => 'true'
                 ]);
 
@@ -67,7 +66,7 @@ class GetFixtures extends BaseCommand
     {
         $fixtures = $this->apiService->request(ApiEndpoints::FIXTURES, [
             'league' => $league->league_api_id,
-            'season' => Carbon::now()->year,
+            'season' => $league->season,
             'round' => 'Regular Season - ' . $round
         ]);
 

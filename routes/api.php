@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\FixturesController;
 use App\Http\Controllers\LeagueController;
 use App\Http\Controllers\PointsController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,11 @@ Route::middleware(['guest'])->group(function () {
 
     Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verifyEmail'])
         ->middleware('signed')->name('verification.verify');
+
+    Route::controller(ForgotPasswordController::class)->group(function () {
+        Route::post('/password/email', 'sendResetLinkEmail');
+        Route::post('/password/reset', 'reset');
+    });
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {

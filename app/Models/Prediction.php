@@ -21,6 +21,6 @@ class Prediction extends Model
 
     public function fixture()
     {
-        return $this->belongsTo(Fixture::class, 'fixture_id');
+        return $this->belongsTo(Fixture::class);
     }
 }

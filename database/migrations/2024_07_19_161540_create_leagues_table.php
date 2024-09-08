@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('slug');
             $table->string('logo');
             $table->integer('rounds');
+            $table->integer('season');
             $table->integer('current_round')->default(0);
 
             $table->timestamps();

@@ -14,6 +14,7 @@ class League extends Model
         'name',
         'slug',
         'logo',
-        'rounds'
+        'rounds',
+        'season'
     ];
 }

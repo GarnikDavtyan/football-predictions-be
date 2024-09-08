@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Jobs\SendVerificationEmail;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class VerificationController extends Controller
@@ -11,21 +13,22 @@ class VerificationController extends Controller
     public function verifyEmail(int $id, string $hash)
     {
         $user = User::findOrFail($id);
+        $frontendUrl = config('app.frontend_url');
 
         if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            return redirect(config('app.frontend_url') . '/verification/invalid');
+            return redirect($frontendUrl . '/verification/invalid');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect(config('app.frontend_url') . '/verification/already-verified');
+            return redirect($frontendUrl . '/verification/already-verified');
         }
 
         $user->markEmailAsVerified();
 
-        return redirect(config('app.frontend_url') . '/verification/verified');
+        return redirect($frontendUrl . '/verification/verified');
     }
 
-    public function resendMail(Request $request)
+    public function resendMail(Request $request): JsonResponse
     {
         $user = $request->user();
 

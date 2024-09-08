@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Constants\ApiEndpoints;
 use App\Models\League;
 use App\Models\Team;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +33,7 @@ class GetTeams extends BaseCommand
             foreach (League::all() as $league) {
                 $teams = $this->apiService->request(ApiEndpoints::TEAMS, [
                     'league' => $league->league_api_id,
-                    'season' => Carbon::now()->year
+                    'season' => $league->season
                 ]);
 
                 foreach ($teams->response as $team) {

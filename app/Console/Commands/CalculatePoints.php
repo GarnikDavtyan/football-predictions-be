@@ -43,8 +43,6 @@ class CalculatePoints extends Command
                 $fixtures = Fixture::where('round', $round)->get();
                 foreach ($fixtures as $fixture) {
                     if ($fixture->status === 'FT') {
-
-
                         $result = $fixture->score_home . '-' . $fixture->score_away;
 
                         foreach ($fixture->predictions as $prediction) {

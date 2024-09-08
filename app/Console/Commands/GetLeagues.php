@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Constants\ApiEndpoints;
 use App\Models\AvailableLeague;
 use App\Models\League;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -50,17 +49,22 @@ class GetLeagues extends BaseCommand
                 ]);
                 $league = $league->response[0]->league;
 
+                $leagueApiId = $league->id;
+                $season = $availableLeague->season;
+                $leagueName = $league->name;
+
                 $rounds = $this->apiService->request(ApiEndpoints::ROUNDS, [
-                    'league' => $league->id,
-                    'season' => Carbon::now()->year
+                    'league' => $leagueApiId,
+                    'season' => $season
                 ]);
 
                 League::create([
-                    'league_api_id' => $league->id,
-                    'name' => $league->name,
-                    'slug' => Str::slug($league->name),
+                    'league_api_id' => $leagueApiId,
+                    'name' => $leagueName,
+                    'slug' => Str::slug($leagueName),
                     'logo' => $league->logo,
-                    'rounds' => count($rounds->response)
+                    'rounds' => count($rounds->response),
+                    'season' => $season
                 ]);
             }
 

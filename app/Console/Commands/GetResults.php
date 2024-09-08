@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Constants\ApiEndpoints;
 use App\Models\Fixture;
 use App\Models\League;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +33,7 @@ class GetResults extends BaseCommand
             foreach (League::all() as $league) {
                 $fixtures = $this->apiService->request(ApiEndpoints::FIXTURES, [
                     'league' => $league->league_api_id,
-                    'season' => Carbon::now()->year,
+                    'season' => $league->season,
                     'round' => 'Regular Season - ' . $league->current_round
                 ]);
 
@@ -42,11 +41,13 @@ class GetResults extends BaseCommand
                     if ($fixtureResults->fixture->status->short === 'FT') {
                         $fixture = Fixture::where('fixture_api_id', $fixtureResults->fixture->id)->first();
 
-                        $fixture->score_home = $fixtureResults->goals->home;
-                        $fixture->score_away = $fixtureResults->goals->away;
-                        $fixture->status = 'FT';
+                        if ($fixture) {
+                            $fixture->score_home = $fixtureResults->goals->home;
+                            $fixture->score_away = $fixtureResults->goals->away;
+                            $fixture->status = 'FT';
 
-                        $fixture->save();
+                            $fixture->save();
+                        }
                     }
                 }
             }

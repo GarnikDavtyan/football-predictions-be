@@ -30,7 +30,7 @@ class UpdateFixtureStatus extends Command
         Fixture::where('date', '<=', Carbon::now())
             ->where('status', 'NS')
             ->update(['status' => 'S']);
-        
+
         $this->info('Fixture statuses updated.');
     }
 }

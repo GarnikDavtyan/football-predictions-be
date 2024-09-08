@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('country');
             $table->string('name');
-            
+            $table->integer('season');
+
             $table->timestamps();
         });
     }

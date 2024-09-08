@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Constants\ApiEndpoints;
 use App\Models\League;
 use App\Models\Team;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +33,7 @@ class GetStandings extends BaseCommand
             foreach (League::all() as $league) {
                 $standings = $this->apiService->request(ApiEndpoints::STANDINGS, [
                     'league' => $league->league_api_id,
-                    'season' => Carbon::now()->year
+                    'season' => $league->season
                 ]);
 
                 foreach ($standings->response[0]->league->standings[0] as $team) {
