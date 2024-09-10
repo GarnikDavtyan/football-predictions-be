@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Constants\ApiEndpoints;
 use App\Models\Fixture;
 use App\Models\League;
+use App\Services\FixtureService;
 use Exception;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class GetResults extends BaseCommand
+class GetResults extends Command
 {
     /**
      * The name and signature of the console command.
@@ -24,6 +25,15 @@ class GetResults extends BaseCommand
      */
     protected $description = 'Get the results of the fixtures from RapidApi';
 
+    private $fixtureService;
+
+    public function __construct(FixtureService $fixtureService)
+    {
+        parent::__construct();
+
+        $this->fixtureService = $fixtureService;
+    }
+
     /**
      * Execute the console command.
      */
@@ -31,23 +41,22 @@ class GetResults extends BaseCommand
     {
         try {
             foreach (League::all() as $league) {
-                $fixtures = $this->apiService->request(ApiEndpoints::FIXTURES, [
-                    'league' => $league->league_api_id,
-                    'season' => $league->season,
-                    'round' => 'Regular Season - ' . $league->current_round
-                ]);
+                $fixtures = $this->fixtureService->fetchFixturesByStatus(
+                    $league->league_api_id,
+                    $league->season,
+                    $league->current_round,
+                    'FT'
+                );
 
-                foreach ($fixtures->response as $fixtureResults) {
-                    if ($fixtureResults->fixture->status->short === 'FT') {
-                        $fixture = Fixture::where('fixture_api_id', $fixtureResults->fixture->id)->first();
+                foreach ($fixtures as $fixtureResults) {
+                    $fixture = Fixture::where('fixture_api_id', $fixtureResults->fixture->id)->first();
 
-                        if ($fixture) {
-                            $fixture->score_home = $fixtureResults->goals->home;
-                            $fixture->score_away = $fixtureResults->goals->away;
-                            $fixture->status = 'FT';
+                    if ($fixture) {
+                        $fixture->score_home = $fixtureResults->goals->home;
+                        $fixture->score_away = $fixtureResults->goals->away;
+                        $fixture->status = 'FT';
 
-                            $fixture->save();
-                        }
+                        $fixture->save();
                     }
                 }
             }

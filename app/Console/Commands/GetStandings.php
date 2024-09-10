@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Constants\ApiEndpoints;
 use App\Models\League;
 use App\Models\Team;
+use App\Services\StandingsService;
 use Exception;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class GetStandings extends BaseCommand
+class GetStandings extends Command
 {
     /**
      * The name and signature of the console command.
@@ -24,6 +25,15 @@ class GetStandings extends BaseCommand
      */
     protected $description = 'Get the leagues standings from the RapidAPI';
 
+    private $standingsService;
+
+    public function __construct(StandingsService $standingsService)
+    {
+        parent::__construct();
+
+        $this->standingsService = $standingsService;
+    }
+
     /**
      * Execute the console command.
      */
@@ -31,12 +41,12 @@ class GetStandings extends BaseCommand
     {
         try {
             foreach (League::all() as $league) {
-                $standings = $this->apiService->request(ApiEndpoints::STANDINGS, [
-                    'league' => $league->league_api_id,
-                    'season' => $league->season
-                ]);
+                $standings = $this->standingsService->fetchStandings(
+                    $league->league_api_id,
+                    $league->season
+                );
 
-                foreach ($standings->response[0]->league->standings[0] as $team) {
+                foreach ($standings as $team) {
                     Team::where('name', $team->team->name)
                         ->update([
                             'rank' => $team->rank,

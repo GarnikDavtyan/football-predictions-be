@@ -28,10 +28,10 @@ class ApiService
                 'headers' => $this->headers,
                 'query' =>  $params
             ]);
-            
+
             return json_decode($response->getBody());
         } catch (RequestException $e) {
-            return false;
+            throw $e;
         }
     }
 }

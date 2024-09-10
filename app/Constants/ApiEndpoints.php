@@ -2,7 +2,8 @@
 
 namespace App\Constants;
 
-class ApiEndpoints {
+class ApiEndpoints
+{
     const LEAGUES = 'leagues';
     const ROUNDS = 'fixtures/rounds';
     const TEAMS = 'teams';

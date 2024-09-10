@@ -2,15 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Constants\ApiEndpoints;
 use App\Models\AvailableLeague;
 use App\Models\League;
+use App\Services\LeagueService;
+use App\Services\RoundService;
 use Exception;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class GetLeagues extends BaseCommand
+class GetLeagues extends Command
 {
     /**
      * The name and signature of the console command.
@@ -25,6 +27,17 @@ class GetLeagues extends BaseCommand
      * @var string
      */
     protected $description = 'Get the leagues from the RapidAPI';
+
+    private $leagueService;
+    private $roundService;
+
+    public function __construct(LeagueService $leagueService, RoundService $roundService)
+    {
+        parent::__construct();
+
+        $this->leagueService = $leagueService;
+        $this->roundService = $roundService;
+    }
 
     /**
      * Execute the console command.
@@ -43,27 +56,23 @@ class GetLeagues extends BaseCommand
             $availableLeagues = AvailableLeague::all();
 
             foreach ($availableLeagues as $availableLeague) {
-                $league = $this->apiService->request(ApiEndpoints::LEAGUES, [
-                    'name' => $availableLeague->name,
-                    'country' => $availableLeague->country
-                ]);
-                $league = $league->response[0]->league;
+                $league = $this->leagueService->fetchLeague(
+                    $availableLeague->name,
+                    $availableLeague->country
+                );
 
                 $leagueApiId = $league->id;
                 $season = $availableLeague->season;
                 $leagueName = $league->name;
 
-                $rounds = $this->apiService->request(ApiEndpoints::ROUNDS, [
-                    'league' => $leagueApiId,
-                    'season' => $season
-                ]);
+                $rounds = $this->roundService->fetchRounds($leagueApiId, $season);
 
                 League::create([
                     'league_api_id' => $leagueApiId,
                     'name' => $leagueName,
                     'slug' => Str::slug($leagueName),
                     'logo' => $league->logo,
-                    'rounds' => count($rounds->response),
+                    'rounds' => count($rounds),
                     'season' => $season
                 ]);
             }

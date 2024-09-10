@@ -26,5 +26,6 @@ class Leagues
             'name' => 'Ligue 1'
         ]
     ];
+
     const SEASON = 2024;
 }

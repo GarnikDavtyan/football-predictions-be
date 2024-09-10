@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Constants\ApiEndpoints;
 use App\Models\League;
 use App\Models\Team;
+use App\Services\TeamService;
 use Exception;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class GetTeams extends BaseCommand
+class GetTeams extends Command
 {
     /**
      * The name and signature of the console command.
@@ -24,6 +25,15 @@ class GetTeams extends BaseCommand
      */
     protected $description = 'Get the teams from the RapidAPI';
 
+    private $teamService;
+
+    public function __construct(TeamService $teamService)
+    {
+        parent::__construct();
+
+        $this->teamService = $teamService;
+    }
+
     /**
      * Execute the console command.
      */
@@ -31,12 +41,12 @@ class GetTeams extends BaseCommand
     {
         try {
             foreach (League::all() as $league) {
-                $teams = $this->apiService->request(ApiEndpoints::TEAMS, [
-                    'league' => $league->league_api_id,
-                    'season' => $league->season
-                ]);
+                $teams = $this->teamService->fetchTeams(
+                    $league->league_api_id,
+                    $league->season
+                );
 
-                foreach ($teams->response as $team) {
+                foreach ($teams as $team) {
                     Team::create([
                         'league_id' => $league->id,
                         'name' => $team->team->name,

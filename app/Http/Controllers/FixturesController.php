@@ -45,7 +45,13 @@ class FixturesController extends Controller
             ];
 
             foreach ($request->predictions as $prediction) {
-                $data['fixture_id'] = $prediction['fixture_id'];
+                $fixtureId = $prediction['fixture_id'];
+
+                if (Fixture::findOrFail($fixtureId)->status !== 'NS') {
+                    throw new Exception('cheating');
+                }
+
+                $data['fixture_id'] = $fixtureId;
                 Prediction::updateOrCreate($data, $prediction);
             }
 
@@ -54,6 +60,10 @@ class FixturesController extends Controller
             return $this->successResponse([], 'Saved successfully!');
         } catch (Exception $e) {
             DB::rollBack();
+
+            if ($e->getMessage() === 'cheating') {
+                return $this->errorResponse('You are cheating!', 400);
+            }
             return $this->errorResponse();
         }
     }

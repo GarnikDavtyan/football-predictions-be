@@ -2,15 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Constants\ApiEndpoints;
 use App\Models\Fixture;
 use App\Models\League;
 use App\Models\Team;
+use App\Services\FixtureService;
+use App\Services\RoundService;
 use Exception;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class GetFixtures extends BaseCommand
+class GetFixtures extends Command
 {
     /**
      * The name and signature of the console command.
@@ -26,6 +28,17 @@ class GetFixtures extends BaseCommand
      */
     protected $description = 'Get the current round and fixtures of the leagues from RapidApi';
 
+    private $fixtureService;
+    private $roundService;
+
+    public function __construct(FixtureService $fixtureService, RoundService $roundService)
+    {
+        parent::__construct();
+
+        $this->fixtureService = $fixtureService;
+        $this->roundService = $roundService;
+    }
+
     /**
      * Execute the console command.
      */
@@ -35,13 +48,13 @@ class GetFixtures extends BaseCommand
             DB::beginTransaction();
 
             foreach (League::all() as $league) {
-                $currentRound = $this->apiService->request(ApiEndpoints::ROUNDS, [
-                    'league' => $league->league_api_id,
-                    'season' => $league->season,
-                    'current' => 'true'
-                ]);
+                $currentRound = $this->roundService->fetchCurrentRound(
+                    $league->league_api_id,
+                    $league->season,
+                    'true'
+                );
 
-                preg_match('/\d+/', $currentRound->response[0], $matches);
+                preg_match('/\d+/', $currentRound, $matches);
                 $currentRound = (int)$matches[0];
 
                 if ($league->current_round !== $currentRound) {
@@ -64,17 +77,17 @@ class GetFixtures extends BaseCommand
 
     private function getFixtures(League $league, int $round)
     {
-        $fixtures = $this->apiService->request(ApiEndpoints::FIXTURES, [
-            'league' => $league->league_api_id,
-            'season' => $league->season,
-            'round' => 'Regular Season - ' . $round
-        ]);
+        $fixtures = $this->fixtureService->fetchFixtures(
+            $league->league_api_id,
+            $league->season,
+            $round
+        );
 
-        if (!count($fixtures->response)) {
+        if (!count($fixtures)) {
             throw new Exception('Fixtures are empty: ' . $league->name);
         }
 
-        foreach ($fixtures->response as $fixture) {
+        foreach ($fixtures as $fixture) {
             $teamHome = Team::where('name', $fixture->teams->home->name)->first();
             $teamAway = Team::where('name', $fixture->teams->away->name)->first();
 

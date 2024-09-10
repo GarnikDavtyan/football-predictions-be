@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Fixture;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class UpdateFixtureStatus extends Command
@@ -27,7 +26,7 @@ class UpdateFixtureStatus extends Command
      */
     public function handle()
     {
-        Fixture::where('date', '<=', Carbon::now())
+        Fixture::where('date', '<=', now())
             ->where('status', 'NS')
             ->update(['status' => 'S']);
 

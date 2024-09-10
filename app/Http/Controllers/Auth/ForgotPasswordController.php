@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PasswordResetLinkRequest;
 use App\Http\Requests\PasswordResetRequest;
+use App\Jobs\SendPasswordResetLinkEmail;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
@@ -25,11 +26,7 @@ class ForgotPasswordController extends Controller
             return $this->errorResponse('The email is not verified. Cannot reset the password', 422);
         }
 
-        $status = Password::sendResetLink(compact('email'));
-
-        if ($status !== Password::RESET_LINK_SENT) {
-            return $this->errorResponse('Error sending reset link. Please try again.');
-        }
+        SendPasswordResetLinkEmail::dispatch($email);
 
         return $this->successResponse([], 'Password reset email has been sent.');
     }

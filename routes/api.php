@@ -22,15 +22,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::controller(LeagueController::class)->group(function () {
-    Route::get('leagues', 'index');
-    Route::get('leagues/{leagueId}/standings', 'getStandings');
+    Route::get('/leagues', 'index');
+    Route::get('/leagues/{leagueId}/standings', 'getStandings');
 });
 
-Route::get('fixtures/{leagueId}/{round}', [FixturesController::class, 'getFixtures']);
+Route::get('/fixtures/{leagueId}/{round}', [FixturesController::class, 'getFixtures']);
 
 Route::controller(PointsController::class)->group(function () {
-    Route::get('points/{leagueId}/{round}', 'getLeagueTop');
-    Route::get('points', 'getTop');
+    Route::get('/points/{leagueId}/{round}', 'getLeagueTop');
+    Route::get('/points', 'getTop');
 });
 
 Route::middleware(['guest'])->group(function () {
@@ -43,17 +43,21 @@ Route::middleware(['guest'])->group(function () {
         ->middleware('signed')->name('verification.verify');
 
     Route::controller(ForgotPasswordController::class)->group(function () {
-        Route::post('/password/email', 'sendResetLinkEmail');
+        Route::post('/password/email', 'sendResetLinkEmail')->middleware('throttle:6,1');
         Route::post('/password/reset', 'reset');
     });
+
+    Route::get('/profile/account-delete/{id}/{token}', [ProfileController::class, 'deleteAccount']);
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-    Route::post('fixtures/{leagueId}/{round}', [FixturesController::class, 'savePredictions']);
+    Route::post('/fixtures/{leagueId}/{round}', [FixturesController::class, 'savePredictions']);
 
     Route::controller(ProfileController::class)->group(function () {
-        Route::put('profile', 'updateProfile');
-        Route::delete('profile/avatar-delete', 'deleteAvatar');
+        Route::put('/profile', 'updateProfile');
+        Route::delete('/profile/avatar-delete', 'deleteAvatar');
+        Route::post('/profile/account-delete-request', 'requestDeleteAccount')
+            ->middleware('throttle:6,1');
     });
 
     Route::get('user', function () {

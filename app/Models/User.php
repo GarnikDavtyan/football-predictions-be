@@ -43,4 +43,24 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function points()
+    {
+        return $this->hasOne(UserPoint::class);
+    }
+
+    public function leaguePoints()
+    {
+        return $this->hasMany(LeaguePoint::class);
+    }
+
+    public function roundPoints()
+    {
+        return $this->hasMany(RoundPoint::class);
+    }
+
+    public function predictions()
+    {
+        return $this->hasMany(Prediction::class);
+    }
 }
