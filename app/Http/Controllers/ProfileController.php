@@ -115,6 +115,7 @@ class ProfileController extends Controller
             $user->roundPoints()->delete();
             $user->predictions()->delete();
             $user->tokens()->delete();
+            $user->deleteAccountTokens()->delete();
 
             $user->delete();
 

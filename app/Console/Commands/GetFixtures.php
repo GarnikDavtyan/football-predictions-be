@@ -7,6 +7,7 @@ use App\Models\League;
 use App\Models\Team;
 use App\Services\FixtureService;
 use App\Services\RoundService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -91,11 +92,13 @@ class GetFixtures extends Command
             $teamHome = Team::where('name', $fixture->teams->home->name)->first();
             $teamAway = Team::where('name', $fixture->teams->away->name)->first();
 
+            $fixtureDate = Carbon::parse($fixture->fixture->date)->format('Y-m-d H:i:s');
+
             Fixture::create([
                 'fixture_api_id' => $fixture->fixture->id,
                 'league_id' => $league->id,
                 'round' => $round,
-                'date' => $fixture->fixture->date,
+                'date' => $fixtureDate,
                 'team_home_id' => $teamHome->id,
                 'team_away_id' => $teamAway->id,
                 'status' => $fixture->fixture->status->short

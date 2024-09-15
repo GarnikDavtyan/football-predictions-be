@@ -47,7 +47,8 @@ class FixturesController extends Controller
             foreach ($request->predictions as $prediction) {
                 $fixtureId = $prediction['fixture_id'];
 
-                if (Fixture::findOrFail($fixtureId)->status !== 'NS') {
+                $fixture = Fixture::findOrFail($fixtureId);
+                if ($fixture->status !== 'NS' || $fixture->date <= now()) {
                     throw new Exception('cheating');
                 }
 
