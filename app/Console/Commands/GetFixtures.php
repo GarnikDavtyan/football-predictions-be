@@ -27,7 +27,7 @@ class GetFixtures extends Command
      *
      * @var string
      */
-    protected $description = 'Get the current round and fixtures of the leagues from RapidApi';
+    protected $description = 'Update the current round and get the fixtures of the leagues from RapidApi';
 
     private $fixtureService;
     private $roundService;
@@ -60,9 +60,20 @@ class GetFixtures extends Command
 
                 if ($league->current_round !== $currentRound) {
                     $league->current_round = $currentRound;
+
+                    if ($currentRound > $league->rounds) {
+                        $league->rounds = $currentRound;
+                    }
+
                     $league->save();
 
-                    $this->getFixtures($league, $currentRound);
+                    $fixturesAlreadyFetched = Fixture::where('league_id', $league->id)
+                        ->where('round', $currentRound)
+                        ->exists();
+
+                    if (!$fixturesAlreadyFetched) {
+                        $this->getFixtures($league, $currentRound);
+                    }
                 }
             }
 

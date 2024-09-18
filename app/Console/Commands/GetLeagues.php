@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\AvailableLeague;
 use App\Models\League;
 use App\Services\LeagueService;
-use App\Services\RoundService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -29,14 +28,12 @@ class GetLeagues extends Command
     protected $description = 'Get the leagues from the RapidAPI';
 
     private $leagueService;
-    private $roundService;
 
-    public function __construct(LeagueService $leagueService, RoundService $roundService)
+    public function __construct(LeagueService $leagueService)
     {
         parent::__construct();
 
         $this->leagueService = $leagueService;
-        $this->roundService = $roundService;
     }
 
     /**
@@ -65,14 +62,11 @@ class GetLeagues extends Command
                 $season = $availableLeague->season;
                 $leagueName = $league->name;
 
-                $rounds = $this->roundService->fetchRounds($leagueApiId, $season);
-
                 League::create([
                     'league_api_id' => $leagueApiId,
                     'name' => $leagueName,
                     'slug' => Str::slug($leagueName),
                     'logo' => $league->logo,
-                    'rounds' => count($rounds),
                     'season' => $season
                 ]);
             }

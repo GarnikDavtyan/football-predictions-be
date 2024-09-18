@@ -12,7 +12,7 @@ class UpdateFixtureStatus extends Command
      *
      * @var string
      */
-    protected $signature = 'fixtures:update-status';
+    protected $signature = 'update:status';
 
     /**
      * The console command description.
