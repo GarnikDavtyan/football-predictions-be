@@ -62,11 +62,11 @@ class PointsController extends Controller
         $userPointsQuery = $model::with('user')->where('user_id', $authId);
 
         if ($leagueId) {
-            $userPointsQuery = $userPointsQuery->where('league_id', $leagueId);
+            $userPointsQuery->where('league_id', $leagueId);
         }
 
         if ($round) {
-            $userPointsQuery = $userPointsQuery->where('round', $round);
+            $userPointsQuery->where('round', $round);
         }
 
         $userPoints = $userPointsQuery->first();
@@ -75,11 +75,11 @@ class PointsController extends Controller
             $rankQuery = $model::where('points', '>', $userPoints->points);
 
             if ($round) {
-                $rankQuery = $rankQuery->where('league_id', $leagueId);
+                $rankQuery->where('league_id', $leagueId);
             }
 
             if ($round) {
-                $rankQuery = $rankQuery->where('round', $round);
+                $rankQuery->where('round', $round);
             }
 
             $rank = $rankQuery->count() + 1;

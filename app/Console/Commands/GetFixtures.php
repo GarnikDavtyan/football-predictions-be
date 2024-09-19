@@ -51,8 +51,7 @@ class GetFixtures extends Command
             foreach (League::all() as $league) {
                 $currentRound = $this->roundService->fetchCurrentRound(
                     $league->league_api_id,
-                    $league->season,
-                    'true'
+                    $league->season
                 );
 
                 preg_match('/\d+/', $currentRound, $matches);

@@ -14,29 +14,16 @@ class RoundService
         $this->apiService = $apiService;
     }
 
-    public function fetchRounds(int $leagueApiId, int $season)
-    {
-        return $this->fetchRoundData($leagueApiId, $season);
-    }
-
-    public function fetchCurrentRound(int $leagueApiId, int $season, string $current)
-    {
-        return $this->fetchRoundData($leagueApiId, $season, $current)[0];
-    }
-
-    private function fetchRoundData(int $leagueApiId, int $season, ?string $current = null)
+    public function fetchCurrentRound(int $leagueApiId, int $season)
     {
         $params = [
             'league' => $leagueApiId,
             'season' => $season,
+            'current' => 'true'
         ];
-
-        if ($current) {
-            $params['current'] = $current;
-        }
 
         $rounds = $this->apiService->request(ApiEndpoints::ROUNDS, $params);
 
-        return $rounds->response;
+        return $rounds->response[0];
     }
 }

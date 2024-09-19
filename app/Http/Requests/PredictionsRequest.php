@@ -17,7 +17,7 @@ class PredictionsRequest extends FormRequest
             'predictions.*.fixture_id' => 'required|integer|exists:fixtures,id',
             'predictions.*.score_home' => 'required|integer',
             'predictions.*.score_away' => 'required|integer',
-            'predictions.*.x2' => 'boolean'
+            'x2_fixture_id' => 'nullable|integer|exists:fixtures,id'
         ];
     }
 }

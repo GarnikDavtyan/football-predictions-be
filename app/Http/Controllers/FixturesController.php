@@ -6,6 +6,7 @@ use App\Helpers\UserHelper;
 use App\Http\Requests\PredictionsRequest;
 use App\Models\Fixture;
 use App\Models\Prediction;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,12 +21,23 @@ class FixturesController extends Controller
             ->where('league_id', $leagueId)
             ->where('round', $round);
 
+        $userToWatchName = $request->user;
         $token = $request->bearerToken();
         if ($token) {
             $authId = UserHelper::getAuthUserId($token);
             if ($authId) {
-                $fixturesQuery = $fixturesQuery->with(['predictions' => function ($query) use ($authId) {
-                    $query->where('user_id', $authId);
+                $userId = $authId;
+                if ($userToWatchName) {
+                    $userToWatch = User::where('name', $userToWatchName)->first();
+                    if ($userToWatch) {
+                        $userId = $userToWatch->id;
+                        $fixturesQuery->where('status', 'FT');
+                    } else {
+                        return $this->errorResponse('No user with this name', 404);
+                    }
+                }
+                $fixturesQuery->with(['predictions' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
                 }]);
             }
         }
@@ -40,11 +52,22 @@ class FixturesController extends Controller
         try {
             DB::beginTransaction();
 
-            $data = [
-                'user_id' => Auth::id()
-            ];
+            $userId = Auth::id();
+            $x2FixtureId = $request->x2_fixture_id;
+            $predictions = $request->predictions;
 
-            foreach ($request->predictions as $prediction) {
+            if ($x2FixtureId) {
+                $x2Fixture = Fixture::findOrFail($x2FixtureId);
+
+                Prediction::where('user_id', $userId)
+                    ->whereHas('fixture', function ($query) use ($x2Fixture) {
+                        $query->where('league_id', $x2Fixture->league_id)
+                            ->where('round', $x2Fixture->round);
+                    })
+                    ->update(['x2' => false]);
+            }
+
+            foreach ($predictions as $prediction) {
                 $fixtureId = $prediction['fixture_id'];
 
                 $fixture = Fixture::findOrFail($fixtureId);
@@ -52,7 +75,13 @@ class FixturesController extends Controller
                     throw new Exception('cheating');
                 }
 
-                $data['fixture_id'] = $fixtureId;
+                $prediction['x2'] = $fixtureId === $x2FixtureId ? true : false;
+
+                $data = [
+                    'user_id' => $userId,
+                    'fixture_id' => $fixtureId
+                ];
+
                 Prediction::updateOrCreate($data, $prediction);
             }
 
