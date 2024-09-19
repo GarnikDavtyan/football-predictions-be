@@ -31,7 +31,9 @@ class FixturesController extends Controller
                     $userToWatch = User::where('name', $userToWatchName)->first();
                     if ($userToWatch) {
                         $userId = $userToWatch->id;
-                        $fixturesQuery->where('status', 'FT');
+                        if ($userId !== $authId) {
+                            $fixturesQuery->where('status', 'FT');
+                        }
                     } else {
                         return $this->errorResponse('No user with this name', 404);
                     }
