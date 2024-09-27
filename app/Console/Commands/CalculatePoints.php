@@ -40,18 +40,20 @@ class CalculatePoints extends Command
                 $leagueId = $league->id;
                 $round = $league->current_round;
 
-                $fixtures = Fixture::where('round', $round)->get();
+                $fixtures = Fixture::where('league_id', $leagueId)
+                    ->where('round', $round)
+                    ->where('status', 'FT')
+                    ->get();
+
                 foreach ($fixtures as $fixture) {
-                    if ($fixture->status === 'FT') {
-                        $result = $fixture->score_home . '-' . $fixture->score_away;
+                    $result = $fixture->score_home . '-' . $fixture->score_away;
 
-                        foreach ($fixture->predictions as $prediction) {
-                            $userPrediction = $prediction->score_home . '-' . $prediction->score_away;
-                            $points = PointsHelper::calculate($result, $userPrediction, $prediction->x2);
+                    foreach ($fixture->predictions as $prediction) {
+                        $userPrediction = $prediction->score_home . '-' . $prediction->score_away;
+                        $points = PointsHelper::calculate($result, $userPrediction, $prediction->x2);
 
-                            $prediction->points = $points;
-                            $prediction->save();
-                        }
+                        $prediction->points = $points;
+                        $prediction->save();
                     }
                 }
 

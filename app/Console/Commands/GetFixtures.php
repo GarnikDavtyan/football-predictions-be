@@ -27,7 +27,7 @@ class GetFixtures extends Command
      *
      * @var string
      */
-    protected $description = 'Update the current round and get the fixtures of the leagues from RapidApi';
+    protected $description = 'Update the current round and get or update the fixtures of the leagues from RapidApi';
 
     private $fixtureService;
     private $roundService;
@@ -57,23 +57,15 @@ class GetFixtures extends Command
                 preg_match('/\d+/', $currentRound, $matches);
                 $currentRound = (int)$matches[0];
 
-                if ($league->current_round !== $currentRound) {
-                    $league->current_round = $currentRound;
+                $league->current_round = $currentRound;
 
-                    if ($currentRound > $league->rounds) {
-                        $league->rounds = $currentRound;
-                    }
-
-                    $league->save();
-
-                    $fixturesAlreadyFetched = Fixture::where('league_id', $league->id)
-                        ->where('round', $currentRound)
-                        ->exists();
-
-                    if (!$fixturesAlreadyFetched) {
-                        $this->getFixtures($league, $currentRound);
-                    }
+                if ($currentRound > $league->rounds) {
+                    $league->rounds = $currentRound;
                 }
+
+                $league->save();
+
+                $this->getFixtures($league, $currentRound);
             }
 
             DB::commit();
@@ -94,18 +86,15 @@ class GetFixtures extends Command
             $round
         );
 
-        if (!count($fixtures)) {
-            throw new Exception('Fixtures are empty: ' . $league->name);
-        }
-
         foreach ($fixtures as $fixture) {
-            $teamHome = Team::where('name', $fixture->teams->home->name)->first();
-            $teamAway = Team::where('name', $fixture->teams->away->name)->first();
+            $teamHome = Team::where('team_api_id', $fixture->teams->home->id)->first();
+            $teamAway = Team::where('team_api_id', $fixture->teams->away->id)->first();
 
             $fixtureDate = Carbon::parse($fixture->fixture->date)->format('Y-m-d H:i:s');
 
-            Fixture::create([
+            Fixture::updateOrCreate([
                 'fixture_api_id' => $fixture->fixture->id,
+            ], [
                 'league_id' => $league->id,
                 'round' => $round,
                 'date' => $fixtureDate,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProfileRequest;
+use App\Jobs\SendVerificationEmail;
 use App\Mail\DeleteAccount;
 use App\Models\DeleteAccountToken;
 use App\Models\User;
@@ -35,12 +36,21 @@ class ProfileController extends Controller
 
             if ($request->old_password && $request->new_password) {
                 if (!Hash::check($request->old_password, $user->password)) {
-                    throw new Exception('The old password is incorrect');
+                    throw new Exception('OLD_ERROR');
                 }
                 $data['password'] = Hash::make($request->new_password);
             }
 
+            $emailChanged = $request->email !== $user->email;
+            if ($emailChanged) {
+                $data['email_verified_at'] = null;
+            }
+
             $user->update($data);
+
+            if ($emailChanged) {
+                SendVerificationEmail::dispatch($user);
+            }
 
             if ($oldAvatarPath) {
                 Storage::delete($oldAvatarPath);
@@ -50,6 +60,10 @@ class ProfileController extends Controller
         } catch (Exception $e) {
             if ($avatarPath) {
                 Storage::delete($avatarPath);
+            }
+
+            if ($e->getMessage() === 'OLD_ERROR') {
+                return $this->errorResponse('The old password is incorrect', 400);
             }
 
             return $this->errorResponse($e->getMessage());

@@ -11,7 +11,7 @@ class PointsHelper
 
         $points = ($score === $prediction) ? 5
             : ($scoreEval === $predictionEval ? 3
-                : ($scoreEval * $predictionEval > 0 ? 1 : 0));
+                : ($scoreEval * $predictionEval > 0 ? 2 : 0));
 
         return $points * ($x2 + 1);
     }

@@ -32,7 +32,7 @@ class FixturesController extends Controller
                     if ($userToWatch) {
                         $userId = $userToWatch->id;
                         if ($userId !== $authId) {
-                            $fixturesQuery->where('status', 'FT');
+                            $fixturesQuery->where('status', '!=', 'NS');
                         }
                     } else {
                         return $this->errorResponse('No user with this name', 404);
@@ -59,14 +59,7 @@ class FixturesController extends Controller
             $predictions = $request->predictions;
 
             if ($x2FixtureId) {
-                $x2Fixture = Fixture::findOrFail($x2FixtureId);
-
-                Prediction::where('user_id', $userId)
-                    ->whereHas('fixture', function ($query) use ($x2Fixture) {
-                        $query->where('league_id', $x2Fixture->league_id)
-                            ->where('round', $x2Fixture->round);
-                    })
-                    ->update(['x2' => false]);
+                $this->validateAndClearX2($x2FixtureId, $userId);
             }
 
             foreach ($predictions as $prediction) {
@@ -74,7 +67,7 @@ class FixturesController extends Controller
 
                 $fixture = Fixture::findOrFail($fixtureId);
                 if ($fixture->status !== 'NS' || $fixture->date <= now()) {
-                    throw new Exception('cheating');
+                    throw new Exception('CHEATING');
                 }
 
                 $prediction['x2'] = $fixtureId === $x2FixtureId ? true : false;
@@ -93,10 +86,40 @@ class FixturesController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
 
-            if ($e->getMessage() === 'cheating') {
+            if ($e->getMessage() === 'CHEATING') {
                 return $this->errorResponse('You are cheating!', 400);
             }
             return $this->errorResponse();
         }
+    }
+
+    private function validateAndClearX2(int $x2FixtureId, int $userId)
+    {
+        $x2Fixture = Fixture::findOrFail($x2FixtureId);
+
+        if ($x2Fixture->date <= now()) {
+            throw new Exception('CHEATING');
+        }
+
+        $leagueRoundFixturesQuery = function ($query) use ($x2Fixture) {
+            $query->where('league_id', $x2Fixture->league_id)
+                ->where('round', $x2Fixture->round);
+        };
+
+        $x2Sealed = Prediction::where('user_id', $userId)
+            ->whereHas('fixture', function ($query) use ($leagueRoundFixturesQuery) {
+                $leagueRoundFixturesQuery($query);
+                $query->where('date', '<=', now());
+            })
+            ->where('x2', true)
+            ->exists();
+
+        if ($x2Sealed) {
+            throw new Exception('CHEATING');
+        }
+
+        Prediction::where('user_id', $userId)
+            ->whereHas('fixture', $leagueRoundFixturesQuery)
+            ->update(['x2' => false]);
     }
 }
