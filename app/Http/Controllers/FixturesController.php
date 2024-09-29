@@ -90,14 +90,14 @@ class FixturesController extends Controller
             foreach ($predictions as $prediction) {
                 $fixtureId = $prediction['fixture_id'];
 
-                if (is_null($prediction['score_home']) || is_null($prediction['score_away'])) {
-                    Prediction::where('user_id', $userId)->where('fixture_id', $fixtureId)->delete();
-                    continue;
-                }
-
                 $fixture = Fixture::findOrFail($fixtureId);
                 if ($fixture->status !== 'NS' || $fixture->date <= now()) {
                     throw new Exception('CHEATING');
+                }
+
+                if (is_null($prediction['score_home']) || is_null($prediction['score_away'])) {
+                    Prediction::where('user_id', $userId)->where('fixture_id', $fixtureId)->delete();
+                    continue;
                 }
 
                 $prediction['x2'] = $fixtureId === $x2FixtureId ? true : false;
