@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\UserHelper;
 use App\Http\Requests\PredictionsRequest;
 use App\Models\Fixture;
+use App\Models\LeaguePoint;
 use App\Models\Prediction;
 use App\Models\User;
 use Exception;
@@ -38,13 +39,37 @@ class FixturesController extends Controller
                         return $this->errorResponse('No user with this name', 404);
                     }
                 }
-                $fixturesQuery->with(['predictions' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }]);
+
+                $top10Users = LeaguePoint::where('league_id', $leagueId)
+                    ->orderByDesc('points')
+                    ->take(10)
+                    ->pluck('user_id');
+
+                $top10Users = $top10Users->reject(function ($id) use ($userId) {
+                    return $id === $userId;
+                })->values()->toArray();
+
+                $fixturesQuery->with('predictions.user');
             }
         }
 
         $fixtures = $fixturesQuery->orderBy('date')->get();
+
+        if (isset($userId)) {
+            foreach ($fixtures as $fixture) {
+                if (isset($top10Users) && $fixture->status !== 'NS') {
+                    $fixture->top10_predictions =  $fixture->predictions
+                        ->whereIn('user_id', $top10Users)
+                        ->sortByDesc('points')
+                        ->values()
+                        ->toArray();
+                }
+
+                $fixture->prediction = $fixture->predictions->where('user_id', $userId)->first();
+
+                $fixture->makeHidden(['predictions']);
+            }
+        }
 
         return $this->successResponse($fixtures);
     }
@@ -64,6 +89,11 @@ class FixturesController extends Controller
 
             foreach ($predictions as $prediction) {
                 $fixtureId = $prediction['fixture_id'];
+
+                if (is_null($prediction['score_home']) || is_null($prediction['score_away'])) {
+                    Prediction::where('user_id', $userId)->where('fixture_id', $fixtureId)->delete();
+                    continue;
+                }
 
                 $fixture = Fixture::findOrFail($fixtureId);
                 if ($fixture->status !== 'NS' || $fixture->date <= now()) {

@@ -15,8 +15,8 @@ class PredictionsRequest extends FormRequest
     {
         return [
             'predictions.*.fixture_id' => 'required|integer|exists:fixtures,id',
-            'predictions.*.score_home' => 'required|integer',
-            'predictions.*.score_away' => 'required|integer',
+            'predictions.*.score_home' => 'nullable|integer',
+            'predictions.*.score_away' => 'nullable|integer',
             'x2_fixture_id' => 'nullable|integer|exists:fixtures,id'
         ];
     }

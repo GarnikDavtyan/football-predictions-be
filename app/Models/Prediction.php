@@ -23,4 +23,9 @@ class Prediction extends Model
     {
         return $this->belongsTo(Fixture::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
