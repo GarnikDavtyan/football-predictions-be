@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\DeleteAccountToken;
+use App\Models\RefreshToken;
 use Illuminate\Console\Command;
 
 class ClearExpiredAccountDeleteTokens extends Command
@@ -12,14 +13,14 @@ class ClearExpiredAccountDeleteTokens extends Command
      *
      * @var string
      */
-    protected $signature = 'clear:delete-tokens';
+    protected $signature = 'clear:tokens';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Clear expired account deletion tokens';
+    protected $description = 'Clear all expired tokens';
 
     /**
      * Execute the console command.
@@ -27,7 +28,8 @@ class ClearExpiredAccountDeleteTokens extends Command
     public function handle()
     {
         DeleteAccountToken::where('expires_at', '<', now())->delete();
+        RefreshToken::where('updated_at', '<', now()->subDays(30));
 
-        $this->info('Expired account deletion tokens have been cleared.');
+        $this->info('Expired tokens have been cleared.');
     }
 }

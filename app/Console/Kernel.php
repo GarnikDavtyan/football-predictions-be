@@ -18,9 +18,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('get:results')->twiceDaily(0, 12, 3);
         $schedule->command('calculate:points')->twiceDaily(0, 12, 4);
         $schedule->command('get:fixtures')->twiceDaily(0, 12, 5);
-        $schedule->command('update:status')->everyMinute();
+        $schedule->command('update:status')->everyFifteenMinutes();
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
-        $schedule->command('clear:delete-tokens')->everyFifteenMinutes();
+        $schedule->command('clear:tokens')->everyFifteenMinutes();
     }
 
     /**

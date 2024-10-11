@@ -69,4 +69,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(DeleteAccountToken::class);
     }
+
+    public function refreshToken()
+    {
+        return $this->hasOne(RefreshToken::class);
+    }
 }
