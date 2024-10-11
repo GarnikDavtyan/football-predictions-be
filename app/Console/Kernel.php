@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('update:status')->everyFifteenMinutes();
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
         $schedule->command('clear:tokens')->everyFifteenMinutes();
+        $schedule->command('sanctum:prune-expired --hours=1')->everyFifteenMinutes();
     }
 
     /**

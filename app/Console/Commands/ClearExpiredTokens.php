@@ -6,7 +6,7 @@ use App\Models\DeleteAccountToken;
 use App\Models\RefreshToken;
 use Illuminate\Console\Command;
 
-class ClearExpiredAccountDeleteTokens extends Command
+class ClearExpiredTokens extends Command
 {
     /**
      * The name and signature of the console command.
