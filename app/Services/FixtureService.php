@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Constants\ApiEndpoints;
+use App\Models\League;
 use App\Services\ApiService;
 
 class FixtureService
@@ -14,22 +15,22 @@ class FixtureService
         $this->apiService = $apiService;
     }
 
-    public function fetchFixtures(int $leagueApiId, int $season, int $round)
+    public function fetchFixtures(League $league)
     {
-        return $this->fetchFixturesData($leagueApiId, $season, $round);
+        return $this->fetchFixturesData($league);
     }
 
-    public function fetchFixturesByStatus(int $leagueApiId, int $season, string $round, string $status)
+    public function fetchFixturesByStatus(League $league, string $status)
     {
-        return $this->fetchFixturesData($leagueApiId, $season, $round, $status);
+        return $this->fetchFixturesData($league, $status);
     }
 
-    private function fetchFixturesData(int $leagueApiId, int $season, int $round, ?string $status = null)
+    private function fetchFixturesData(League $league, ?string $status = null)
     {
         $params = [
-            'league' => $leagueApiId,
-            'season' => $season,
-            'round' => 'Regular Season - ' . $round
+            'league' => $league->league_api_id,
+            'season' =>  $league->season,
+            'round' => $league->round_api
         ];
 
         if ($status) {

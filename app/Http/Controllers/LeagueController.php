@@ -15,7 +15,7 @@ class LeagueController extends Controller
 
     public function getStandings(int $league_id)
     {
-        $standings = Team::where('league_id', $league_id)->orderBy('rank')->get();
+        $standings = Team::where('league_id', $league_id)->whereNotNull('rank')->orderBy('rank')->get();
 
         return $this->successResponse($standings);
     }

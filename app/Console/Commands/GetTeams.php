@@ -47,9 +47,10 @@ class GetTeams extends Command
                 );
 
                 foreach ($teams as $team) {
-                    Team::create([
+                    Team::updateOrCreate([
                         'team_api_id' => $team->team->id,
                         'league_id' => $league->id,
+                    ], [
                         'name' => $team->team->name,
                         'logo' => $team->team->logo
                     ]);

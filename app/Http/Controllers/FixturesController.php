@@ -33,7 +33,7 @@ class FixturesController extends Controller
                     if ($userToWatch) {
                         $userId = $userToWatch->id;
                         if ($userId !== $authId) {
-                            $fixturesQuery->where('status', '!=', 'NS');
+                            $fixturesQuery->whereNotIn('status', ['NS', 'PST']);
                         }
                     } else {
                         return $this->errorResponse('No user with this name', 404);
@@ -57,7 +57,7 @@ class FixturesController extends Controller
 
         if (isset($userId)) {
             foreach ($fixtures as $fixture) {
-                if (isset($top10Users) && $fixture->status !== 'NS') {
+                if (isset($top10Users) && !in_array($fixture->status, ['NS', 'PST'])) {
                     $fixture->top10_predictions =  $fixture->predictions
                         ->whereIn('user_id', $top10Users)
                         ->sortByDesc('points')
@@ -91,7 +91,7 @@ class FixturesController extends Controller
                 $fixtureId = $prediction['fixture_id'];
 
                 $fixture = Fixture::findOrFail($fixtureId);
-                if ($fixture->status !== 'NS' || $fixture->date <= now()) {
+                if ($fixture->date <= now()) {
                     throw new Exception('CHEATING');
                 }
 

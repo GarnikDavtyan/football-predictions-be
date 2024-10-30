@@ -15,7 +15,7 @@ class AvailableLeaguesSeeder extends Seeder
     {
         foreach (Leagues::AVAILABLE_LEAGUES as $league) {
             $league['season'] = Leagues::SEASON;
-            AvailableLeague::create($league);
+            AvailableLeague::firstOrCreate($league);
         }
     }
 }

@@ -7,7 +7,6 @@ use App\Models\League;
 use App\Services\LeagueService;
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -42,14 +41,6 @@ class GetLeagues extends Command
     public function handle()
     {
         try {
-            DB::table('predictions')->delete();
-            DB::table('fixtures')->delete();
-            DB::table('teams')->delete();
-            DB::table('round_points')->delete();
-            DB::table('league_points')->delete();
-            DB::table('user_points')->delete();
-            DB::table('leagues')->delete();
-
             $availableLeagues = AvailableLeague::all();
 
             foreach ($availableLeagues as $availableLeague) {
@@ -62,8 +53,9 @@ class GetLeagues extends Command
                 $season = $availableLeague->season;
                 $leagueName = $league->name;
 
-                League::create([
+                League::updateOrCreate([
                     'league_api_id' => $leagueApiId,
+                ], [
                     'name' => $leagueName,
                     'slug' => Str::slug($leagueName),
                     'logo' => $league->logo,

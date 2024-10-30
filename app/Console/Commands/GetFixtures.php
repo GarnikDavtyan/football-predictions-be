@@ -49,15 +49,16 @@ class GetFixtures extends Command
             DB::beginTransaction();
 
             foreach (League::all() as $league) {
-                $currentRound = $this->roundService->fetchCurrentRound(
+                $currentRoundApi = $this->roundService->fetchCurrentRound(
                     $league->league_api_id,
                     $league->season
                 );
 
-                preg_match('/\d+/', $currentRound, $matches);
+                preg_match('/\d+/', $currentRoundApi, $matches);
                 $currentRound = (int)$matches[0];
 
                 $league->current_round = $currentRound;
+                $league->round_api = $currentRoundApi;
 
                 if ($currentRound > $league->rounds) {
                     $league->rounds = $currentRound;
@@ -65,7 +66,7 @@ class GetFixtures extends Command
 
                 $league->save();
 
-                $this->getFixtures($league, $currentRound);
+                $this->getFixtures($league);
             }
 
             DB::commit();
@@ -78,13 +79,9 @@ class GetFixtures extends Command
         }
     }
 
-    private function getFixtures(League $league, int $round)
+    private function getFixtures(League $league)
     {
-        $fixtures = $this->fixtureService->fetchFixtures(
-            $league->league_api_id,
-            $league->season,
-            $round
-        );
+        $fixtures = $this->fixtureService->fetchFixtures($league);
 
         foreach ($fixtures as $fixture) {
             $teamHome = Team::where('team_api_id', $fixture->teams->home->id)->first();
@@ -96,7 +93,7 @@ class GetFixtures extends Command
                 'fixture_api_id' => $fixture->fixture->id,
             ], [
                 'league_id' => $league->id,
-                'round' => $round,
+                'round' => $league->current_round,
                 'date' => $fixtureDate,
                 'team_home_id' => $teamHome->id,
                 'team_away_id' => $teamAway->id,

@@ -41,12 +41,7 @@ class GetResults extends Command
     {
         try {
             foreach (League::all() as $league) {
-                $fixtures = $this->fixtureService->fetchFixturesByStatus(
-                    $league->league_api_id,
-                    $league->season,
-                    $league->current_round,
-                    'FT'
-                );
+                $fixtures = $this->fixtureService->fetchFixturesByStatus($league, 'FT');
 
                 foreach ($fixtures as $fixtureResults) {
                     $fixture = Fixture::where('fixture_api_id', $fixtureResults->fixture->id)->first();

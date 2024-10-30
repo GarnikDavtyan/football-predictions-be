@@ -48,6 +48,7 @@ class GetStandings extends Command
 
                 foreach ($standings as $team) {
                     Team::where('team_api_id', $team->team->id)
+                        ->where('league_id', $league->id)
                         ->update([
                             'rank' => $team->rank,
                             'games' => $team->all->played,

@@ -24,6 +24,10 @@ class Leagues
         [
             'country' => 'France',
             'name' => 'Ligue 1'
+        ],
+        [
+            'country' => 'World',
+            'name' => 'UEFA Champions League'
         ]
     ];
 
