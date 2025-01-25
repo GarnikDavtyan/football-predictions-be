@@ -24,6 +24,13 @@ class ProfileController extends Controller
             $data = $request->all();
             $user = User::findOrFail(Auth::id());
 
+            if ($request->old_password && $request->new_password) {
+                if (!Hash::check($request->old_password, $user->password)) {
+                    return $this->errorResponse('The old password is incorrect', 400);
+                }
+                $data['password'] = Hash::make($request->new_password);
+            }
+
             $avatarPath = '';
             $oldAvatarPath = '';
 
@@ -32,13 +39,6 @@ class ProfileController extends Controller
                 $data['avatar'] = $avatarPath;
 
                 $oldAvatarPath = $user->avatar;
-            }
-
-            if ($request->old_password && $request->new_password) {
-                if (!Hash::check($request->old_password, $user->password)) {
-                    throw new Exception('OLD_ERROR');
-                }
-                $data['password'] = Hash::make($request->new_password);
             }
 
             $emailChanged = $request->email !== $user->email;
@@ -60,10 +60,6 @@ class ProfileController extends Controller
         } catch (Exception $e) {
             if ($avatarPath) {
                 Storage::delete($avatarPath);
-            }
-
-            if ($e->getMessage() === 'OLD_ERROR') {
-                return $this->errorResponse('The old password is incorrect', 400);
             }
 
             return $this->errorResponse($e->getMessage());
