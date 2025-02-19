@@ -55,7 +55,7 @@ class GetFixtures extends Command
                 );
 
                 preg_match('/\d+/', $currentRoundApi, $matches);
-                $currentRound = (int)$matches[0];
+                $currentRound = isset($matches[0]) ? (int)$matches[0] : $league->current_round + 1;
 
                 $league->current_round = $currentRound;
                 $league->round_api = $currentRoundApi;
